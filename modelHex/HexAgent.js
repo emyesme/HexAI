@@ -32,7 +32,6 @@ class HexAgent extends Agent {
                     let row = Math.floor(neighboor / board.length);
                     let col = neighboor % board.length;
                     //el padre tiene una jugadad propia
-                    if (board[i][j] === this.id ){
                         //si el vecino tiene jugada propia 
                             //costo es el mismo que llegar al padre
 
@@ -41,9 +40,8 @@ class HexAgent extends Agent {
 
                         //si el vecino NO tiene jugada
                             //costo es el del padre mas uno
-                    }else{
-                        //el padre tiene no tienen jugada
-                        if (board[i][j] === 0){
+
+                    //el padre tiene no tienen jugada
                             //si el vecino tiene jugada propia
                                 //costo es el costo del vecino
 
@@ -52,8 +50,6 @@ class HexAgent extends Agent {
 
                             //si el vecino NO tiene jugada
                                 //costo es el del padre mas uno
-                        }
-                    }
                     //el padre tiene una jugada del oponente
                         //debe ignorar los vecinos
                 }

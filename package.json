@@ -1,0 +1,66 @@
+{
+  "name": "ai-reactapp",
+  "version": "0.0.1",
+  "description": "react integration with ai-agents",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --mode development --open --hot",
+    "build": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andcastillo/ai-reactApp.git"
+  },
+  "keywords": [
+    "\"artifical",
+    "agent",
+    "react",
+    "cleaner",
+    "example\""
+  ],
+  "author": "andcastillo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/andcastillo/ai-reactApp/issues"
+  },
+  "homepage": "https://github.com/andcastillo/ai-reactApp#readme",
+  "babel": {
+    "plugins": [
+      "transform-decorators-legacy"
+    ],
+    "presets": [
+      "react-app"
+    ]
+  },
+  "dependencies": {
+    "@emotion/core": "10.0.14",
+    "@emotion/css": "10.0.14",
+    "@emotion/styled": "10.0.14",
+    "ai-agents": "0.2.0",
+    "css-loader": "2.1.1",
+    "d3-shape": "1.3.5",
+    "emotion": "10.0.14",
+    "lodash": "^4.17.15",
+    "ml-matrix": "6.1.2",
+    "mobx": "5.11.0",
+    "mobx-react": "6.1.1",
+    "node-dijkstra": "2.5.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-emotion": "10.0.0",
+    "react-scripts": "3.0.1",
+    "style-loader": "0.23.1",
+    "webpack": "^4.33.0",
+    "webpack-cli": "^3.3.3",
+    "webpack-dev-server": "^3.7.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-plugin-transform-decorators-legacy": "1.3.5",
+    "babel-plugin-transform-class-properties": "6.24.1",
+    "html-webpack-plugin": "^3.2.0"
+  }
+}
