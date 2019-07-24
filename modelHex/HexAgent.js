@@ -20,6 +20,8 @@ class HexAgent extends Agent {
     }
 
     send() {
+        let node = Node(this.perception, None);
+        
         return [0, 0];
     }
 }
@@ -89,37 +91,80 @@ class State {
             let firstsChilds = this.getNeighborhood(currentNodeDijkstra)
             if (firstsChilds.length > 0){
                 for (let firstChild of firstsChilds){
-                    this.insert(firstChild,queue);
+                    //verificaremos si ya existen los nodos que creamos
+                    for(let node of queue){
+                        //si el nodo ya existia
+                        if((node.coordinate === firstChild.coordinate) && (firstChild.weigth <= node.weigth)){
+                            //y su peso es menor al que tenia, se reemplaza
+                            node.weigth = firstChild.weigth
+                        }else{
+                            //sino, no existia y se inserta
+                            this.insert(firstChild)
+                        }
+                    }
                 }
                 firstsChilds = []
             }
         }
-    }
-
+    };
+    /**Find the weigth between a node and other */
     cost(nodeFather,neighboorCoords){
-        //
+        let size = this.board.length;
+        let fatherRow = Math.floor(nodeFather.coordinate / size);
+        let fatherCol = nodeFather.coordinate % size;
+        let neighboorRow = Math.floor(neighboorCoords / size);
+        let neighboorCol = neighboorCoords % size;
+        if (this.board[fatherRow][fatherCol] === this.id){
         //el padre tiene una jugada propia
-            //si el vecino tiene jugada propia 
-                //costo vecino es el mismo que llegar al padre
-
-            //si el vecino tiene jugada del oponente
-                //costo vecino es infinito
-
+            if(this.board[neighboorRow][neighboorCol] === 0){
             //si el vecino NO tiene jugada
                 //costo vecino es el del padre mas uno
+                return nodeFather.weigth + 1;
+                //se reemplaza si tiene valor mejor al anterior
+            }else{
+                if(this.board[neighboorRow][neighboorCol] === this.id){
+                    //si el vecino tiene jugada propia 
+                        //costo vecino es el mismo que llegar al padre
+                        return nodeFather.weigth;
+                        //se reemplaza si existe
+                }else{
+                //si el vecino tiene jugada del oponente
+                    //costo vecino es infinito
+                    return Infinity;
+                }
+            }
+        }else{
+            if(this.board[fatherRow[fatherCol] === 0]){
+            //el padre tiene no tienen jugada
+                if(this.board[neighboorRow][neighboorCol] === 0){
+                //si el vecino NO tiene jugada
+                    //costo vecino es el del padre mas uno
+                    return nodeFather.weigth + 1;
+                    //se reemplaza si tiene un valor menor al que ya existe
 
-        //el padre tiene no tienen jugada
-            //si el vecino tiene jugada propia
-                //costo vecino es el costo del vecino
-
-            //si el vecino tiene jugada del oponente
-                //costo vecino es infinito
-
-            //si el vecino NO tiene jugada
-                //costo vecino es el del padre mas uno
-        //el padre tiene una jugada del oponente
-            //debe ignorar los vecinos
-    }
+                }else{
+                    if(this.board[neighboorRow][neighboorCol] === this.id){
+                    //si el vecino tiene jugada propia
+                        //costo vecino es el costo del vecino
+                        return Infinity
+                        //y si ya existe se reemplaza
+                        
+                        
+                    }else{
+                    //si el vecino tiene jugada del oponente
+                        //costo vecino es infinito
+                        return Infinity;
+                        //reemplazar el que exista si no es infinito
+                    }
+                }
+            }else{
+            //el padre tiene una jugada del oponente
+                //debe ignorar los vecinos
+                return Infinity
+            }
+        }
+        
+    };
     /**
      * Return an array of the neighbors of the currentHex
      * id = row * size + col
