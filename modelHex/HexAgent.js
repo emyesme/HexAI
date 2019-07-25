@@ -20,10 +20,11 @@ class HexAgent extends Agent {
         super(value);
     }
     send() {
+        console.log(this)
         var board = this.perception;
-        //console.log(board)
         let node = new Node(new State(board,this.id), new State([],this.id));
-        console.log(node.cost);
+        console.log(node.cost.weigth);
+        console.log(Math.floor(node.cost.coordinate / board.length),",", node.cost.coordinate % board.length) 
         let available = getEmptyHex(board);
         let move = available[Math.round(Math.random() * (available.length - 1))];
         return [Math.floor(move / board.length), move % board.length];
@@ -61,7 +62,7 @@ class Node {
         this.state = state;
         this.parent = parent;
         console.log("treeDijkstra");
-        this.cost = state.treeDijkstra();
+        this.cost = state.treeDijkstra();/////////////////
         console.log("TERMINA")
     }
 }
@@ -81,39 +82,50 @@ class State {
     };
     treeDijkstra() {
         //dummy node
-        //let nodeDijsktra = nodeDijsktra(-1, 0, false);
         var queue = [];
-        for (var i= 0; i< this.board[0].length; i++){
-            if (this.board[i][0] === this.idAgent){
-                let aux = new nodeDijkstra(i*this.board[0].length,0,false)
-                this.insertSort(queue, aux);
-            }
-            else{
-                if(this.board[i][0] === 0){
-                    //console.log("hijovacio", i*this.board[0].length )
-                    let coord = i*this.board[0].length;
-                    let aux = new nodeDijkstra(coord,1,false)
-                    this.insertSort(queue, aux);
-                }else{
-                    let aux = new nodeDijkstra(i*this.board[0].length,Infinity,false)
+        ///////////////////////////////////
+        if(this.idAgent === "1"){///////////////////////////////////////
+            for (var i= 0; i< this.board[0].length; i++){
+                if (this.board[i][0] === this.idAgent){
+                    let aux = new nodeDijkstra(i*this.board[0].length,0,false)
                     this.insertSort(queue, aux);
                 }
+                else{
+                    if(this.board[i][0] === 0){
+                        let coord = i*this.board[0].length;
+                        let aux = new nodeDijkstra(coord,1,false)
+                        this.insertSort(queue, aux);
+                    }else{
+                        let aux = new nodeDijkstra(i*this.board[0].length,Infinity,false)
+                        this.insertSort(queue, aux);
+                    }
+                }
             }
+        }else{////////////////////////////////////////////////////////
+            for (var i= 0; i< this.board.length; i++){
+                if (this.board[0][i] === this.idAgent){
+                    let aux = new nodeDijkstra(0*this.board[0].length+i,0,false)
+                    this.insertSort(queue, aux);
+                }
+                else{
+                    if(this.board[0][i] === 0){
+                        let coord = 0*this.board[0].length+i;
+                        let aux = new nodeDijkstra(coord,1,false)
+                        this.insertSort(queue, aux);
+                    }else{
+                        let aux = new nodeDijkstra(0*this.board[0].length+i,Infinity,false)
+                        this.insertSort(queue, aux);
+                    }
+                }
+            }            
         }
-        //console.log("primeros hijos")
+        //////////////////////////////////////
         //console.log(queue)
         var stop = 0
         while (queue.length && stop < 500){//3
             stop = stop + 1
-            //console.log("######################while ",stop)
-            //console.log(queue);
             var currentNodeDijkstra = queue[0];
             queue.shift();
-
-            //taboo.push(currentNodeDijkstra);//evitar reemplazar por uno mas pesado
-            /*console.log(currentNodeDijkstra);
-            console.log("resto")
-            console.log(queue)*/
             if(currentNodeDijkstra === null){
                 return console.log("no solucion");
             }
@@ -129,13 +141,13 @@ class State {
                     console.log("META!!!!!!!!!!!!!!!!!!!!!!")    
                     console.log(currentNodeDijkstra)
                     console.log(queue);
-                    return currentNodeDijkstra.weigth;
+                    return currentNodeDijkstra;
                 }else{
                     console.log("######################while ",stop)
                     console.log("META!!!!!!!!!!!!!!!!!!!!!!En otra parte")    
                     console.log(queue[index])
                     console.log(queue);
-                    return queue[index].weigth;                    
+                    return queue[index];                    
                 }
                 //llego
 
@@ -286,84 +298,31 @@ class State {
             //console.log("hijo6: ", col - 1 + (row + 1) * size)
             result.push(new nodeDijkstra(col - 1 + (row + 1) * size,this.cost(currentNodeDijkstra,col - 1 + (row + 1) * size),false));
         }
-        if(col >= this.board[0].length - 1){
-            //console.log("hijo meta: ", col + row * size,"...",currentNodeDijkstra.weigth)
-            //si el nodo que lleva a la meta es del oponente no cuenta como meta
-            //si el nodo que lleva a la meta es infinity no cuenta
-            if ((this.board[row][col] === 0 || this.board[row][col] === this.idAgent) && isFinite(currentNodeDijkstra.weigth)){
-                console.log("meta creada ",new nodeDijkstra(col + 1 + row * size, currentNodeDijkstra.weigth, true))
-                result.push(new nodeDijkstra(col + row * size, currentNodeDijkstra.weigth, true));
+        //////////////////////////////////
+        if(this.idAgent === "1"){ ///////////////////////////////////////////////////
+            if(col >= this.board[0].length - 1){
+                //console.log("hijo meta: ", col + row * size,"...",currentNodeDijkstra.weigth)
+                //si el nodo que lleva a la meta es del oponente no cuenta como meta
+                //si el nodo que lleva a la meta es infinity no cuenta
+                if ((this.board[row][col] === 0 || this.board[row][col] === this.idAgent) && isFinite(currentNodeDijkstra.weigth)){
+                    console.log("meta creada ",new nodeDijkstra(col + 1 + row * size, currentNodeDijkstra.weigth, true))
+                    result.push(new nodeDijkstra(col + row * size, currentNodeDijkstra.weigth, true));
+                }
             }
+        }else{ //////////////////////////////////////////////////////////////////////////////////////////////////////
+            if(row >= this.board.length - 1){
+                //console.log("hijo meta: ", col + row * size,"...",currentNodeDijkstra.weigth)
+                //si el nodo que lleva a la meta es del oponente no cuenta como meta
+                //si el nodo que lleva a la meta es infinity no cuenta
+                if ((this.board[row][col] === 0 || this.board[row][col] === this.idAgent) && isFinite(currentNodeDijkstra.weigth)){
+                    console.log("meta creada ",new nodeDijkstra(col + 1 + row * size, currentNodeDijkstra.weigth, true))
+                    result.push(new nodeDijkstra(col + row * size, currentNodeDijkstra.weigth, true));
+                }
+            }           
         }
+        /////////////////////////////////7
         return result;
     }
     ////
 }
-
-const MinHeap = function() {
-    this.nodes = [];
-    this.getLeftIndex = (index) => 2 * index + 1;
-    this.getRightIndex = (index) => 2 * index + 2;
-    this.getParentIndex = (index) => {
-      if (index === 0) return undefined;
-      return Math.floor((index - 1) / 2);
-    }
-    this.insert = function(value) {
-      this.nodes.push(value);
-      let currentIndex = this.nodes.length - 1;
-      let parentIndex = this.getParentIndex(currentIndex);
-      while (parentIndex >= 0 && value.weight < this.nodes[parentIndex].weight) {
-        // Swap the parent for the child.
-        this.swap(currentIndex, parentIndex);
-        currentIndex = parentIndex;
-        parentIndex = this.getParentIndex(currentIndex);
-      }
-    }
-    this.remove = function() {
-      if (this.nodes.length) {
-        // Swap the first with the last node.
-        this.swap(0, this.nodes.length - 1);		
-        // Pop the min value.
-        let minValue = this.nodes.pop();
-        // Resort the array.
-        this.siftDown(0);
-        return minValue;
-      }
-    }
-    this.siftDown = function(index) {
-      let smallestIndex = index;
-      let left = this.getLeftIndex(index);
-      let right = this.getRightIndex(index);
-      let size = this.nodes.length;
-      if (left < size && this.nodes[left].weight < this.nodes[smallestIndex].weight) {
-        smallestIndex = left;
-      }
-      if (right < size && this.nodes[right].weight < this.nodes[smallestIndex].weight) {
-        smallestIndex = right;
-      }
-      if (index !== smallestIndex) {
-        this.swap(smallestIndex, index);
-        this.siftDown(smallestIndex);
-      }
-    }
-
-    this.print = function() {
-      return this.nodes;
-    }
-    this.swap = function(indexA, indexB) {
-      let temp = this.nodes[indexA];
-      this.nodes[indexA] = this.nodes[indexB];
-      this.nodes[indexB] = temp;
-    }
-    this.sort = function() {
-      let sorted = [];
-      let heap = [...this.nodes];
-      while (this.nodes.length) {
-        sorted.push(this.remove());
-      }
-      this.nodes = heap;
-      return sorted;
-    }
-  };
-
 
