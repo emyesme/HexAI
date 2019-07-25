@@ -118,12 +118,27 @@ class State {
                 return console.log("no solucion");
             }
             if( currentNodeDijkstra.goal){
+                var index = queue.findIndex(function(element){
+                    if (element !== null){
+                        return ((element.goal === currentNodeDijkstra.goal) && (element.weigth < currentNodeDijkstra.weigth));
+                    }
+                    return false;
+                });
+                if(index === -1){
+                    console.log("######################while ",stop)
+                    console.log("META!!!!!!!!!!!!!!!!!!!!!!")    
+                    console.log(currentNodeDijkstra)
+                    console.log(queue);
+                    return currentNodeDijkstra.weigth;
+                }else{
+                    console.log("######################while ",stop)
+                    console.log("META!!!!!!!!!!!!!!!!!!!!!!En otra parte")    
+                    console.log(queue[index])
+                    console.log(queue);
+                    return queue[index].weigth;                    
+                }
                 //llego
-                console.log("######################while ",stop)
-                console.log("META!!!!!!!!!!!!!!!!!!!!!!")    
-                console.log(currentNodeDijkstra)
-                console.log(queue);
-                return currentNodeDijkstra.weigth;
+
             }
             //console.log("calcula vecinos de nodedijkstra")
             let firstsChilds = this.getNeighborhood(currentNodeDijkstra)
@@ -229,7 +244,6 @@ class State {
                 }
             }else{
             //el padre tiene una jugada del oponente
-
                 return Infinity
             }
         }
