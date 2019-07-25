@@ -21,7 +21,7 @@ class HexAgent extends Agent {
     }
     send() {
         var board = this.perception;
-        console.log(board)
+        //console.log(board)
         let node = new Node(new State(board,this.id), new State([],this.id));
         console.log(node.cost);
         let available = getEmptyHex(board);
@@ -82,53 +82,58 @@ class State {
     treeDijkstra() {
         //dummy node
         //let nodeDijsktra = nodeDijsktra(-1, 0, false);
-        var queue = [null]
+        var queue = [];
         for (var i= 0; i< this.board[0].length; i++){
             if (this.board[i][0] === this.idAgent){
                 let aux = new nodeDijkstra(i*this.board[0].length,0,false)
-                this.insert(aux,queue)    
+                this.insertSort(queue, aux);
             }
             else{
                 if(this.board[i][0] === 0){
-                    console.log("hijovacio", i*this.board[0].length )
+                    //console.log("hijovacio", i*this.board[0].length )
                     let coord = i*this.board[0].length;
                     let aux = new nodeDijkstra(coord,1,false)
-                    this.insert(aux,queue)
+                    this.insertSort(queue, aux);
                 }else{
                     let aux = new nodeDijkstra(i*this.board[0].length,Infinity,false)
-                    this.insert(aux,queue)    
+                    this.insertSort(queue, aux);
                 }
             }
         }
-        console.log(queue)
-        var taboo = [];
+        //console.log("primeros hijos")
+        //console.log(queue)
         var stop = 0
-        while (queue.length && stop < 100){//3
+        while (queue.length && stop < 500){//3
             stop = stop + 1
-            console.log("######################while ",stop)
-            var currentNodeDijkstra = this.remove(queue);
+            //console.log("######################while ",stop)
+            //console.log(queue);
+            var currentNodeDijkstra = queue[0];
+            queue.shift();
+
             //taboo.push(currentNodeDijkstra);//evitar reemplazar por uno mas pesado
-            console.log(currentNodeDijkstra);
+            /*console.log(currentNodeDijkstra);
             console.log("resto")
-            console.log(queue)
+            console.log(queue)*/
             if(currentNodeDijkstra === null){
                 return console.log("no solucion");
             }
             if( currentNodeDijkstra.goal){
                 //llego
+                console.log("######################while ",stop)
                 console.log("META!!!!!!!!!!!!!!!!!!!!!!")    
                 console.log(currentNodeDijkstra)
+                console.log(queue);
                 return currentNodeDijkstra.weigth;
             }
-            console.log("calcula vecinos de nodedijkstra")
+            //console.log("calcula vecinos de nodedijkstra")
             let firstsChilds = this.getNeighborhood(currentNodeDijkstra)
-            console.log("currentNodeDijkstra")
+            /*console.log("currentNodeDijkstra")
             console.log(currentNodeDijkstra)
             console.log("hijos obtenidos")
             console.log(firstsChilds)
-            console.log("tiene vecinos de nodedijkstra")
+            console.log("tiene vecinos de nodedijkstra")*/
             if (firstsChilds.length > 0){
-                console.log("empieza a recorrer vecinos")
+                //console.log("empieza a recorrer vecinos")
                 for (let firstChild of firstsChilds){
                     //verificaremos si el nodo existe en la lista
                     var index = queue.findIndex(function(element){
@@ -138,32 +143,40 @@ class State {
                     return false;
                     });
                     if (index === -1){
-                        this.insert(firstChild,queue);
+                        this.insertSort(queue, firstChild);
                     }else{
-                        console.log("existia")
+                        //console.log("existia")
                         //si existe y es meta ...
-                        if(firstChild.goal){
-                            console.log("meta comparando",queue[index].weigth,">",firstChild.weigth);
-                        }
-                        console.log(queue[index].weigth , ">", firstChild.weigth)
+                        //console.log(queue.nodes[index].weigth , ">", firstChild.weigth)
                         //si existe y su costo es menor al del actual no cambia
                         if(queue[index].weigth > firstChild.weigth){
-                            console.log("era mayor")
+                            //console.log("era mayor")
                             queue[index].weigth = firstChild.weigth
                         }
                     }
                 }
                 firstsChilds = []   
-                console.log("vacia la lista de vecinos generados")
-                console.log(queue)
+                /*console.log("vacia la lista de vecinos generados")
+                console.log(queue)*/
             }
         }
     };
+    insertSort(array, element){
+        array.push(element);
+        var i = array.length - 1;
+        var item = array[i];
+        while (i > 0 && item.weight < array[i-1].weight) {
+            array[i] = array[i-1];
+            i -= 1;
+        }
+        array[i] = item;
+        return array;
+    }
     /**Find the weigth between a node and other */
     cost(nodeFather,neighboorCoords){
-        console.log("cost")
+        /*console.log("cost")
         console.log("cost padre")
-        console.log(nodeFather.coordinate)
+        console.log(nodeFather.coordinate)*/
         let size = this.board.length;
         let fatherRow = Math.floor(nodeFather.coordinate / size);
         let fatherCol = nodeFather.coordinate % size;
@@ -172,7 +185,7 @@ class State {
         if (this.board[fatherRow][fatherCol] === this.idAgent){
         //el padre tiene una jugada propia
             if(this.board[neighboorRow][neighboorCol] === 0){
-                console.log("el vecino no tiene jugada pero padre si ")
+                //console.log("el vecino no tiene jugada pero padre si ")
             //si el vecino NO tiene jugada
                 //costo vecino es el del padre mas uno
                 return nodeFather.weigth + 1;
@@ -230,37 +243,37 @@ class State {
      * @param {Matrix} board 
      */
     getNeighborhood(currentNodeDijkstra) {
-        console.log("obtener vecinos")
+        //console.log("obtener vecinos")
         let size = this.board.length;
         let row = Math.floor(currentNodeDijkstra.coordinate / size);
         let col = currentNodeDijkstra.coordinate % size;
         let result = [];
         if (row > 0) {
-            console.log("hijo1: ", col + (row - 1) * size)
+            //console.log("hijo1: ", col + (row - 1) * size)
             result.push(new nodeDijkstra(col + (row - 1) * size,this.cost(currentNodeDijkstra,col + (row - 1) * size),false));
         }
         if (row > 0 && col + 1 < size) {
-            console.log("hijo2: ", col + 1 + (row - 1) * size)
+            //console.log("hijo2: ", col + 1 + (row - 1) * size)
             result.push(new nodeDijkstra(col + 1 + (row - 1) * size, this.cost(currentNodeDijkstra,col + 1 + (row - 1) * size),false));
         }
         if (col > 0) {
-            console.log("hijo3: ", col - 1 + row * size)
+            //console.log("hijo3: ", col - 1 + row * size)
             result.push(new nodeDijkstra(col - 1 + row * size,this.cost(currentNodeDijkstra,col - 1 + row * size), false));
         }
         if (col + 1 < size) {
-            console.log("hijo4: ",col + 1 + row * size)
+            //console.log("hijo4: ",col + 1 + row * size)
             result.push(new nodeDijkstra(col + 1 + row * size,this.cost(currentNodeDijkstra,col + 1 + row * size),false));
         }
         if (row + 1 < size) {
-            console.log("hijo5: ", col + (row + 1) * size)
+            //console.log("hijo5: ", col + (row + 1) * size)
             result.push(new nodeDijkstra(col + (row + 1) * size,this.cost(currentNodeDijkstra,col + (row + 1) * size),false));
         }
         if (row + 1 < size && col > 0) {
-            console.log("hijo6: ", col - 1 + (row + 1) * size)
+            //console.log("hijo6: ", col - 1 + (row + 1) * size)
             result.push(new nodeDijkstra(col - 1 + (row + 1) * size,this.cost(currentNodeDijkstra,col - 1 + (row + 1) * size),false));
         }
         if(col >= this.board[0].length - 1){
-            console.log("hijo meta: ", col + row * size,"...",currentNodeDijkstra.weigth)
+            //console.log("hijo meta: ", col + row * size,"...",currentNodeDijkstra.weigth)
             //si el nodo que lleva a la meta es del oponente no cuenta como meta
             //si el nodo que lleva a la meta es infinity no cuenta
             if ((this.board[row][col] === 0 || this.board[row][col] === this.idAgent) && isFinite(currentNodeDijkstra.weigth)){
@@ -271,57 +284,72 @@ class State {
         return result;
     }
     ////
-	insert(num,heap) {
-		heap.push(num);
-		if (heap.length > 2) {
-			let idx = heap.length - 1;
-			while (heap[idx].weight < heap[Math.floor(idx/2)].weight) {
-				if (idx >= 1) {
-					[heap[Math.floor(idx/2)], heap[idx]] = [heap[idx], heap[Math.floor(idx/2)]];
-					if (Math.floor(idx/2) > 1) {
-						idx = Math.floor(idx/2);
-					} else {
-						break;
-					};
-				};
-			};
-		};
-	};
-    ////
-	remove(heap) {
-		let smallest = heap[1];
-		if (heap.length > 2) {
-			heap[1] = heap[heap.length - 1];
-			heap.splice(heap.length - 1);
-			if (heap.length == 3) {
-				if (heap[1].weight > heap[2].weight) {
-					[heap[1], heap[2]] = [heap[2], heap[1]];
-				};
-				return smallest;
-			};
-			let i = 1;
-			let left = 2 * i;
-			let right = 2 * i + 1;
-			while (heap[i].weight >= heap[left].weight || heap[i].weight >= heap[right].weight) {
-				if (heap[left].weight < heap[right].weight) {
-					[heap[i], heap[left]] = [heap[left], heap[i]];
-					i = 2 * i
-				} else {
-					[heap[i], heap[right]] = [heap[right], heap[i]];
-					i = 2 * i + 1;
-				};
-				left = 2 * i;
-				right = 2 * i + 1;
-				if (heap[left] == undefined && heap[right] == undefined) {
-					break;
-				};
-			};
-		} else if (heap.length == 2) {
-			heap.splice(1, 1);
-		} else {
-			return null;
-		};
-		return smallest;
-	};
 }
+
+const MinHeap = function() {
+    this.nodes = [];
+    this.getLeftIndex = (index) => 2 * index + 1;
+    this.getRightIndex = (index) => 2 * index + 2;
+    this.getParentIndex = (index) => {
+      if (index === 0) return undefined;
+      return Math.floor((index - 1) / 2);
+    }
+    this.insert = function(value) {
+      this.nodes.push(value);
+      let currentIndex = this.nodes.length - 1;
+      let parentIndex = this.getParentIndex(currentIndex);
+      while (parentIndex >= 0 && value.weight < this.nodes[parentIndex].weight) {
+        // Swap the parent for the child.
+        this.swap(currentIndex, parentIndex);
+        currentIndex = parentIndex;
+        parentIndex = this.getParentIndex(currentIndex);
+      }
+    }
+    this.remove = function() {
+      if (this.nodes.length) {
+        // Swap the first with the last node.
+        this.swap(0, this.nodes.length - 1);		
+        // Pop the min value.
+        let minValue = this.nodes.pop();
+        // Resort the array.
+        this.siftDown(0);
+        return minValue;
+      }
+    }
+    this.siftDown = function(index) {
+      let smallestIndex = index;
+      let left = this.getLeftIndex(index);
+      let right = this.getRightIndex(index);
+      let size = this.nodes.length;
+      if (left < size && this.nodes[left].weight < this.nodes[smallestIndex].weight) {
+        smallestIndex = left;
+      }
+      if (right < size && this.nodes[right].weight < this.nodes[smallestIndex].weight) {
+        smallestIndex = right;
+      }
+      if (index !== smallestIndex) {
+        this.swap(smallestIndex, index);
+        this.siftDown(smallestIndex);
+      }
+    }
+
+    this.print = function() {
+      return this.nodes;
+    }
+    this.swap = function(indexA, indexB) {
+      let temp = this.nodes[indexA];
+      this.nodes[indexA] = this.nodes[indexB];
+      this.nodes[indexB] = temp;
+    }
+    this.sort = function() {
+      let sorted = [];
+      let heap = [...this.nodes];
+      while (this.nodes.length) {
+        sorted.push(this.remove());
+      }
+      this.nodes = heap;
+      return sorted;
+    }
+  };
+
 
