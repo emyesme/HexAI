@@ -22,9 +22,7 @@ const App = observer(class App extends Component {
         super(props);
         let gridSize = props.gridSize;
         let viewport = props.viewport;
-        let map = [[0, 0, 0],[0,0,0],[0,0,0]];
-
-
+        let map = [[0, 0, "2",0],[0,"2",0,0],[0,0,"1",0],[0,0,0,0]];
         this.state = { board: new Board({ board: map }), status: "New game" };
         let that = this;
 
@@ -32,7 +30,7 @@ const App = observer(class App extends Component {
             onFinish: (result) => {
                 let board = JSON.parse(JSON.stringify(result.data.world));
                 let actions = result.actions;
-                that.setState({ board: new Board({ board }), status: 'Winer: ' + actions[actions.length - 1].agentID});
+                that.setState({ board: new Board({ board }), status: 'Winner: ' + actions[actions.length - 1].agentID});
             },
             onTurn: (result) => {
                 let board = JSON.parse(JSON.stringify(result.data.world));
