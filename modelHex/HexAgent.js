@@ -51,29 +51,36 @@ class HexAgent extends Agent {
         var dummyBoard = dummyNode.board.map(function (arr) { return arr.slice(); })
         //nivel 1        
         var moves = getEmptyHex(dummyBoard);
-        for (let move of moves) {
+        for (let move of moves) {//yo
             var childboard = dummyBoard.map(function (arr) { return arr.slice(); });
             //console.log(childboard);
-            childboard[Math.floor(move / dummyBoard.length)][move % dummyBoard.length] = dummyNode.idAgent;
+            childboard[Math.floor(move / dummyBoard.length)][move % dummyBoard.length] = dummyNode.idAgent;//yo id
             /*console.log("marco",dummyNode.idAgent)
             console.log(childboard[Math.floor(move / dummyBoard.length)][move % dummyBoard.length])
             console.log("chilboard cost..");
             console.log(childboard);*/
-            var betaOne = new Node(childboard, dummyNode.idAgent, dummyNode, Infinity);
+            console.log("id nivel 1 ", dummyNode.idAgent)
+            var betaOne = new Node(childboard, dummyNode.idAgent, dummyNode, Infinity);//yo id
             //nivel 2
+            let idOponent = "2";
+            if (betaOne.idAgent !== "1"){
+                idOponent = "1";
+            }
             let betaOneBoard = betaOne.board.map(function (arr) { return arr.slice(); })
             let movesBeta = getEmptyHex(betaOneBoard);
             for (let moveBeta of movesBeta) {
                 let childboardBetaOne = betaOneBoard.map(function (arr) { return arr.slice(); });
-                childboardBetaOne[Math.floor(moveBeta / betaOneBoard.length)][moveBeta % betaOneBoard.length] = betaOne.idAgent;
-                let childNodeBetaOne = new Node(childboardBetaOne, betaOne.idAgent, betaOne, Infinity);
-                //nivel 3
                 //while nietos nunca actualizan al abuelo
-            
-/*                 for (let move of moves) {
+                console.log("id nivel 2 ", idOponent)
+                childboardBetaOne[Math.floor(moveBeta / betaOneBoard.length)][moveBeta % betaOneBoard.length] = idOponent;
+                let childNodeBetaOne = new Node(childboardBetaOne, idOponent, betaOne, Infinity);//oponente
+                //nivel 3
+                let movesChild = getEmptyHex(childboardBetaOne);
+                for (let moveChild of movesChild) {
+                    console.log("id nivel 3 ", dummyNode.idAgent)
                     var babyboardAlphaOne = childboardBetaOne.map(function (arr) { return arr.slice(); });
-                    babyboardAlphaOne[Math.floor(move / childboardBetaOne.length)][move % childboardBetaOne.length] = childNodeBetaOne.idAgent;
-                    var babyNodeAlphaOne = new Node(babyboardAlphaOne, childNodeBetaOne.idAgent, child, -Infinity);
+                    babyboardAlphaOne[Math.floor(moveChild / childboardBetaOne.length)][moveChild % childboardBetaOne.length] = dummyNode.idAgent;
+                    var babyNodeAlphaOne = new Node(babyboardAlphaOne, dummyNode.idAgent, childNodeBetaOne, -Infinity);//yo
                     console.log("dijkstra babynodealphaone")
                     babyNodeAlphaOne.dijkstra();
                     //movimiento propio no cambio heuristica
@@ -83,56 +90,47 @@ class HexAgent extends Agent {
                     if (babyNodeAlphaOne.heuristic > betaOne.heuristic) {
                         //poda
                         break;
-
-                    }/*else {
-                        queueMinimax.push(babyNodeAlphaOne);
-                    }*/
-
-            //}
-            /*
-                console.log("reemplazo el valor del padre? 3", childNodeBetaOne.heuristic > childNodeBetaOne.heuristic)
-                console.log(childNodeBetaOne.heuristic)
-                console.log(babyNodeAlphaOne.heuristic)
-                if (childNodeBetaOne.heuristic > childNodeBetaOne.parent.heuristic) {
-                    childNodeBetaOne.heuristic = childNodeBetaOne.parent.heuristic;
-                    choice = childNodeBetaOne.board;
-                    console.log("choice 3", choice);
-                }*/
-                ////
-
-                childNodeBetaOne.dijkstra();
-                //console.log("dijkstra childnotebetaone", childNodeBetaOne)
-                //movimientos del oponente
-                childNodeBetaOne.heuristic = - childNodeBetaOne.heuristic;
-                //
-                /*console.log("nieto heuristica,", childNodeBetaOne.heuristic);
-                console.log("nieto padre", betaOne.heuristic);
-                console.log("nieto abuelo", dummyNode.heuristic);*/
-                //poda
-                if (childNodeBetaOne.heuristic < betaOne.heuristic) {
-                    betaOne.heuristic = childNodeBetaOne.heuristic;
+                    }
+                    /*console.log("reemplazo el valor del padre? 3", childNodeBetaOne.heuristic > childNodeBetaOne.heuristic)
+                    console.log(childNodeBetaOne.heuristic)
+                    console.log(babyNodeAlphaOne.heuristic)*/
+                    if (childNodeBetaOne.heuristic > childNodeBetaOne.parent.heuristic) {
+                        childNodeBetaOne.heuristic = childNodeBetaOne.parent.heuristic;
+                        choice = moveChild;
+                        console.log("choice 3", choice,"heuristica, ", childNodeBetaOne.heuristic); 
+                    }
+                    ////
+                    childNodeBetaOne.dijkstra();
+                    //console.log("dijkstra childnotebetaone", childNodeBetaOne)
+                    //movimientos del oponente
+                    childNodeBetaOne.heuristic = - childNodeBetaOne.heuristic;
+                    //
+                    /*console.log("nieto heuristica,", childNodeBetaOne.heuristic);
+                    console.log("nieto padre", betaOne.heuristic);
+                    console.log("nieto abuelo", dummyNode.heuristic);*/
+                    //poda
+                    if (childNodeBetaOne.heuristic < betaOne.heuristic) {
+                        betaOne.heuristic = childNodeBetaOne.heuristic;
+                    }
+                    if (childNodeBetaOne.heuristic < dummyNode.heuristic) {/////////////////////////
+                        break;
+                    }
+                    ////
+                    ///
+                    /*console.log("reemplazo el valor del padre?", betaOne.heuristic > dummyNode.heuristic)
+                    console.log(dummyNode.heuristic)
+                    console.log(betaOne.heuristic)*/
+                    if (betaOne.heuristic > dummyNode.heuristic) {
+                        dummyNode.heuristic = betaOne.heuristic;
+                        choice = move;
+                        console.log("choice", choice, "heuristica ,",betaOne.heuristic);
+                    }
+                ///
                 }
-                if (childNodeBetaOne.heuristic < dummyNode.heuristic) {/////////////////////////
-                    break;
-                }
-                ////
-
-            ///
-            /*console.log("reemplazo el valor del padre?", betaOne.heuristic > dummyNode.heuristic)
-            console.log(dummyNode.heuristic)
-            console.log(betaOne.heuristic)*/
-            if (betaOne.heuristic > dummyNode.heuristic) {
-                dummyNode.heuristic = betaOne.heuristic;
-                choice = move;
-                console.log("choice", choice, "heuristica ,",betaOne.heuristic);
-            }
-            ///
             }
         }
-            
         return choice;
     }
-
 }
 
 
@@ -185,7 +183,6 @@ class Node {
             if (this.idAgent !== "1") {
                 idOponent = "1";
             }
-            /*console.log(this.parent)*/
             let oponentCost = this.treeDijkstra(idOponent);/////////////////
             let myCost = this.treeDijkstra(this.idAgent);/////////////////
             /*console.log("sobrevivio")
