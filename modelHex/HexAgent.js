@@ -3,6 +3,7 @@ const Agent = require('ai-agents').Agent;
 class HexAgentRandom extends Agent {
     constructor(value) {
         super(value);
+        this.send = this.send.bind(this)
     }
 
     send() {
@@ -18,18 +19,91 @@ class HexAgentRandom extends Agent {
 class HexAgent extends Agent {
     constructor(value) {
         super(value);
-    }
+        this.minimax = this.minimax.bind(this)
+        this.send = this.send.bind(this)
+    };
+    
+    
+    
     send() {
-        console.log(this)
-        var board = this.perception;
-        let node = new Node(new State(board,this.id), new State([],this.id));
-        console.log(node.cost.weigth);
-        console.log(Math.floor(node.cost.coordinate / board.length),",", node.cost.coordinate % board.length) 
+        //error raro 
+        var board = this.perception.map(function(arr){ return arr.slice();})
+        //const board = this.perception;
+        console.log(this.perception)
+        //console.log("costo del padre")
+        //console.log(dummyNode)
+        let depth = 3;
+        let max_player = true;
+        console.log("entra a minimax")
+        let bestValue = this.minimax(board,depth,max_player);
+        //console.log(bestValue);
         let available = getEmptyHex(board);
         let move = available[Math.round(Math.random() * (available.length - 1))];
-        return [Math.floor(move / board.length), move % board.length];
+        return [3,3];
     }
+
+    minimax(board,depth, max_player){
+        //dummy node
+        let dummyNode = new Node(new State(board,this.id), undefined);
+        //If the depth reach its limit or the node doesn't have any children return the node weight
+        //calculando los hijos del padre
+        /*console.log(board)
+        console.log("dummyNode")*/
+        var dummyBoard =  dummyNode.state.board.map(function(arr){ return arr.slice();})
+        //console.log(dummyBoard)
+        var moves = getEmptyHex(dummyBoard);
+        var childs = [];
+        var stop = 0;
+        //hace los hijos
+        for (let move of moves){
+            //if(stop < 2){
+            stop = stop + 1;
+            var childboard = dummyBoard.map(function(arr){ return arr.slice();})
+            //console.log(childboard);
+            childboard[Math.floor(move / dummyBoard.length)][move % dummyBoard.length] = dummyNode.state.idAgent;
+            /*console.log("marco",dummyNode.state.idAgent)
+            console.log(childboard[Math.floor(move / dummyBoard.length)][move % dummyBoard.length])
+            console.log("chilboard cost..");
+            console.log(childboard);*/
+            var child = new Node(new State(childboard,dummyNode.state.idAgent),dummyNode)
+            childs.push(child);
+            //console.log(child)
+            //}
+        }
+
+        /*console.log("hijos...");
+        console.log(childs);*/
+
+        
+        if(depth == 0 || !("children" in queue)){
+            return node.weight;
+        }
+        
+        var bestValue, v;
+    
+        //
+        if(max_player){
+            bestValue = -Infinity;
+            //
+            for(let child of parent_node){
+                v = minimax(parent_node.children[child], depth-1, false);
+                bestValue = Math.max(v, bestValue);
+            }
+        }else{
+            bestValue = Infinity;
+            for(let child of parent_node){
+                v = minimax(parent_node.children[child], depth-1, true);
+                bestValue = Math.min(v, bestValue);
+            }
+    
+            return bestValue;
+        }
+        return 0;
+    }
+
 }
+
+
 
 
 module.exports = {
@@ -62,7 +136,39 @@ class Node {
         this.state = state;
         this.parent = parent;
         console.log("treeDijkstra");
-        this.cost = state.treeDijkstra();/////////////////
+        if (this.parent === undefined){
+            this.heuristic = 0;
+        }
+        else{
+            //contrincante id
+            var idOponent = "2";
+            if (this.state.idAgent !== "1"){
+                idOponent = "1";
+            }
+            console.log("DIJKSTRA calcula...")
+            /*console.log(this.parent)*/
+            let oponentCost = this.state.treeDijkstra(idOponent);/////////////////
+            let myCost = this.state.treeDijkstra(this.state.idAgent);/////////////////
+            console.log("sobrevivio")
+            console.log("id",idOponent);
+            console.log(oponentCost);
+            console.log("id",this.state.idAgent)
+            console.log(myCost);
+            console.log("estado ganador", oponentCost)
+            console.log("estado ganador", myCost)
+            if (!isFinite(oponentCost)){
+                this.heuristic = myCost;
+            }
+            else{
+                if(!isFinite(myCost)){
+                    this.heuristic = Infinity;
+                }
+                else{
+                    this.heuristic = oponentCost - myCost; /////////////
+                }
+            }
+            console.log("estado ganador -", this.heuristic)
+        }
         console.log("TERMINA")
     }
 }
@@ -80,13 +186,15 @@ class State {
         this.board = board;
         this.idAgent = idAgent;
     };
-    treeDijkstra() {
+    treeDijkstra(id) {
+        console.log("empieza dijkstra", id==="1")
         //dummy node
         var queue = [];
         ///////////////////////////////////
-        if(this.idAgent === "1"){///////////////////////////////////////
+
+        if(id === "1"){///////////////////////////////////////
             for (var i= 0; i< this.board[0].length; i++){
-                if (this.board[i][0] === this.idAgent){
+                if (this.board[i][0] === id){
                     let aux = new nodeDijkstra(i*this.board[0].length,0,false)
                     this.insertSort(queue, aux);
                 }
@@ -103,7 +211,7 @@ class State {
             }
         }else{////////////////////////////////////////////////////////
             for (var i= 0; i< this.board.length; i++){
-                if (this.board[0][i] === this.idAgent){
+                if (this.board[0][i] === id){
                     let aux = new nodeDijkstra(0*this.board[0].length+i,0,false)
                     this.insertSort(queue, aux);
                 }
@@ -120,7 +228,7 @@ class State {
             }            
         }
         //////////////////////////////////////
-        //console.log(queue)
+        console.log(queue)
         var stop = 0
         while (queue.length && stop < 500){//3
             stop = stop + 1
@@ -130,6 +238,7 @@ class State {
                 return console.log("no solucion");
             }
             if( currentNodeDijkstra.goal){
+                console.log("estado ganador", currentNodeDijkstra)
                 var index = queue.findIndex(function(element){
                     if (element !== null){
                         return ((element.goal === currentNodeDijkstra.goal) && (element.weigth < currentNodeDijkstra.weigth));
@@ -137,23 +246,23 @@ class State {
                     return false;
                 });
                 if(index === -1){
-                    console.log("######################while ",stop)
+                    /*console.log("######################while ",stop)
                     console.log("META!!!!!!!!!!!!!!!!!!!!!!")    
                     console.log(currentNodeDijkstra)
-                    console.log(queue);
-                    return currentNodeDijkstra;
+                    console.log(queue);*/
+                    return currentNodeDijkstra.weigth;
                 }else{
-                    console.log("######################while ",stop)
+                    /*console.log("######################while ",stop)
                     console.log("META!!!!!!!!!!!!!!!!!!!!!!En otra parte")    
                     console.log(queue[index])
-                    console.log(queue);
-                    return queue[index];                    
+                    console.log(queue);*/
+                    return queue[index].weigth;                    
                 }
                 //llego
 
             }
             //console.log("calcula vecinos de nodedijkstra")
-            let firstsChilds = this.getNeighborhood(currentNodeDijkstra)
+            let firstsChilds = this.getNeighborhood(currentNodeDijkstra, id)
             /*console.log("currentNodeDijkstra")
             console.log(currentNodeDijkstra)
             console.log("hijos obtenidos")
@@ -200,7 +309,7 @@ class State {
         return array;
     }
     /**Find the weigth between a node and other */
-    cost(nodeFather,neighboorCoords){
+    cost(nodeFather,neighboorCoords,id){
         /*console.log("cost")
         console.log("cost padre")
         console.log(nodeFather.coordinate)*/
@@ -209,7 +318,7 @@ class State {
         let fatherCol = nodeFather.coordinate % size;
         let neighboorRow = Math.floor(neighboorCoords / size);
         let neighboorCol = neighboorCoords % size;
-        if (this.board[fatherRow][fatherCol] === this.idAgent){
+        if (this.board[fatherRow][fatherCol] === id){
         //el padre tiene una jugada propia
             if(this.board[neighboorRow][neighboorCol] === 0){
                 //console.log("el vecino no tiene jugada pero padre si ")
@@ -218,7 +327,7 @@ class State {
                 return nodeFather.weigth + 1;
                 //se reemplaza si tiene valor mejor al anterior
             }else{
-                if(this.board[neighboorRow][neighboorCol] === this.idAgent){
+                if(this.board[neighboorRow][neighboorCol] === id){
                     //si el vecino tiene jugada propia 
                         //costo vecino es el mismo que llegar al padre
                         return nodeFather.weigth;
@@ -240,7 +349,7 @@ class State {
                     //se reemplaza si tiene un valor menor al que ya existe
 
                 }else{
-                    if(this.board[neighboorRow][neighboorCol] === this.idAgent){
+                    if(this.board[neighboorRow][neighboorCol] === id){
                     //si el vecino tiene jugada propia
                         //costo vecino es el costo del padre
                         return nodeFather.weigth;
@@ -268,7 +377,7 @@ class State {
      * @param {Number} player 
      * @param {Matrix} board 
      */
-    getNeighborhood(currentNodeDijkstra) {
+    getNeighborhood(currentNodeDijkstra,id) {
         //console.log("obtener vecinos")
         let size = this.board.length;
         let row = Math.floor(currentNodeDijkstra.coordinate / size);
@@ -276,36 +385,36 @@ class State {
         let result = [];
         if (row > 0) {
             //console.log("hijo1: ", col + (row - 1) * size)
-            result.push(new nodeDijkstra(col + (row - 1) * size,this.cost(currentNodeDijkstra,col + (row - 1) * size),false));
+            result.push(new nodeDijkstra(col + (row - 1) * size,this.cost(currentNodeDijkstra,col + (row - 1) * size, id),false));
         }
         if (row > 0 && col + 1 < size) {
             //console.log("hijo2: ", col + 1 + (row - 1) * size)
-            result.push(new nodeDijkstra(col + 1 + (row - 1) * size, this.cost(currentNodeDijkstra,col + 1 + (row - 1) * size),false));
+            result.push(new nodeDijkstra(col + 1 + (row - 1) * size, this.cost(currentNodeDijkstra,col + 1 + (row - 1) * size, id),false));
         }
         if (col > 0) {
             //console.log("hijo3: ", col - 1 + row * size)
-            result.push(new nodeDijkstra(col - 1 + row * size,this.cost(currentNodeDijkstra,col - 1 + row * size), false));
+            result.push(new nodeDijkstra(col - 1 + row * size,this.cost(currentNodeDijkstra,col - 1 + row * size, id), false));
         }
         if (col + 1 < size) {
             //console.log("hijo4: ",col + 1 + row * size)
-            result.push(new nodeDijkstra(col + 1 + row * size,this.cost(currentNodeDijkstra,col + 1 + row * size),false));
+            result.push(new nodeDijkstra(col + 1 + row * size,this.cost(currentNodeDijkstra,col + 1 + row * size, id),false));
         }
         if (row + 1 < size) {
             //console.log("hijo5: ", col + (row + 1) * size)
-            result.push(new nodeDijkstra(col + (row + 1) * size,this.cost(currentNodeDijkstra,col + (row + 1) * size),false));
+            result.push(new nodeDijkstra(col + (row + 1) * size,this.cost(currentNodeDijkstra,col + (row + 1) * size, id),false));
         }
         if (row + 1 < size && col > 0) {
             //console.log("hijo6: ", col - 1 + (row + 1) * size)
-            result.push(new nodeDijkstra(col - 1 + (row + 1) * size,this.cost(currentNodeDijkstra,col - 1 + (row + 1) * size),false));
+            result.push(new nodeDijkstra(col - 1 + (row + 1) * size,this.cost(currentNodeDijkstra,col - 1 + (row + 1) * size, id),false));
         }
         //////////////////////////////////
-        if(this.idAgent === "1"){ ///////////////////////////////////////////////////
+        if(id === "1"){ ///////////////////////////////////////////////////
             if(col >= this.board[0].length - 1){
                 //console.log("hijo meta: ", col + row * size,"...",currentNodeDijkstra.weigth)
                 //si el nodo que lleva a la meta es del oponente no cuenta como meta
                 //si el nodo que lleva a la meta es infinity no cuenta
-                if ((this.board[row][col] === 0 || this.board[row][col] === this.idAgent) && isFinite(currentNodeDijkstra.weigth)){
-                    console.log("meta creada ",new nodeDijkstra(col + 1 + row * size, currentNodeDijkstra.weigth, true))
+                if ((this.board[row][col] === 0 || this.board[row][col] === id) && isFinite(currentNodeDijkstra.weigth)){
+                    //console.log("meta creada ",new nodeDijkstra(col + 1 + row * size, currentNodeDijkstra.weigth, true))
                     result.push(new nodeDijkstra(col + row * size, currentNodeDijkstra.weigth, true));
                 }
             }
@@ -314,8 +423,8 @@ class State {
                 //console.log("hijo meta: ", col + row * size,"...",currentNodeDijkstra.weigth)
                 //si el nodo que lleva a la meta es del oponente no cuenta como meta
                 //si el nodo que lleva a la meta es infinity no cuenta
-                if ((this.board[row][col] === 0 || this.board[row][col] === this.idAgent) && isFinite(currentNodeDijkstra.weigth)){
-                    console.log("meta creada ",new nodeDijkstra(col + 1 + row * size, currentNodeDijkstra.weigth, true))
+                if ((this.board[row][col] === 0 || this.board[row][col] === id) && isFinite(currentNodeDijkstra.weigth)){
+                    //console.log("meta creada ",new nodeDijkstra(col + 1 + row * size, currentNodeDijkstra.weigth, true))
                     result.push(new nodeDijkstra(col + row * size, currentNodeDijkstra.weigth, true));
                 }
             }           
