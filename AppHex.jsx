@@ -14,16 +14,16 @@ import passedClickThreshold from './utils/passedClickThreshold';
 import problemContainer from './modelHex/problemContainer';
 import {HexAgent, HexAgentRandom} from './modelHex/HexAgent';
 
-problemContainer.addAgent("2", HexAgent, { play: true });
-problemContainer.addAgent("1", HexAgentRandom, { play: false });
+problemContainer.addAgent("1", HexAgent, { play: true });
+problemContainer.addAgent("2", HexAgentRandom, { play: false });
 
 const App = observer(class App extends Component {
     constructor(props) {
         super(props);
         let gridSize = props.gridSize;
         let viewport = props.viewport;
-        let map = [[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]];
-        //let map = [[0,0,0,0],[0,0,0,0],[0,0,0,0],["1","1",0,"1"]] ;
+        //let map = [[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]];
+        let map = [[0,0,0,0],[0,0,0,0],[0,0,0,0],["1","1","2","1"]] ;
         this.state = { board: new Board({ board: map }), status: "New game" };
         let that = this;
 

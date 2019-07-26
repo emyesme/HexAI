@@ -1,3 +1,11 @@
+/**
+ * Introduccion a la Inteligencia Artificial
+ * Integrantes:
+ * Jaime Cuartas Granada 1632664
+ * Emily Esmeralda Carvajal Camelo 1630436
+ * Luis Restrepo Hoyos
+ */
+
 const Agent = require('ai-agents').Agent;
 
 class HexAgentRandom extends Agent {
@@ -35,7 +43,7 @@ class HexAgent extends Agent {
         console.log("entra a minimax")
         let bestValue = this.minimax(board, depth, max_player);
         var t1 = performance.now();
-        console.log("BESTVALUE", bestValue);
+        //console.log("BESTVALUE", bestValue);
         console.log("tiempo ms", t1 - t0);
         return [Math.floor(bestValue / board.length), bestValue % board.length];
     }
@@ -103,7 +111,7 @@ class HexAgent extends Agent {
             if (betaOne.heuristic > dummyNode.heuristic) {
                 dummyNode.heuristic = betaOne.heuristic;
                 choice = move;
-                console.log("choice", choice, "heuristica ,", betaOne.heuristic);
+                //console.log("choice", choice, "heuristica ,", betaOne.heuristic);
             }
         }
         return choice;
