@@ -53,27 +53,68 @@ class HexAgent extends Agent {
         //console.log(dummyBoard)
         var moves = getEmptyHex(dummyBoard);
         var childs = [];
-        var stop = 0;
         //hace los hijos
         for (let move of moves){
-            //if(stop < 2){
-            stop = stop + 1;
             var childboard = dummyBoard.map(function(arr){ return arr.slice();});
             //console.log(childboard);
             childboard[Math.floor(move / dummyBoard.length)][move % dummyBoard.length] = dummyNode.idAgent;
-            /*console.log("marco",dummyNode.state.idAgent)
+            /*console.log("marco",dummyNode.idAgent)
             console.log(childboard[Math.floor(move / dummyBoard.length)][move % dummyBoard.length])
             console.log("chilboard cost..");
             console.log(childboard);*/
             var child = new Node(childboard,dummyNode.idAgent,dummyNode,Infinity);
-            child.dijkstra();
+            //child.dijkstra();
 
             childs.push(child);
             console.log(childs)
-            //}
         }
         //this.minimax()
+        let queueMinimax = childs;
+        let choice = [];
+        while(queueMinimax.length){
+            let betaOne = queueMinimax.pop();
+            let betaOneBoard =  betaOne.board.map(function(arr){ return arr.slice();})
+            moves = getEmptyHex(betaOneBoard);
+            for (let move of moves){
+                var childboardBetaOne = betaOneBoard.map(function(arr){ return arr.slice();});
+                childboardBetaOne[Math.floor(move / betaOneBoard.length)][move % betaOneBoard.length] = betaOne.idAgent;
+                var childNodeBetaOne = new Node(childboardBetaOne, betaOne.idAgent, betaOne, Infinity);
+                
+                ////
+                console.log("dijkstra childnotebetaone")
+                childNodeBetaOne.dijkstra();
+                console.log("dijkstra childnotebetaone",childNodeBetaOne)
+                //movimientos del oponente
+                childNodeBetaOne.heuristic = - childNodeBetaOne.heuristic;
+                //
+                console.log("nieto heuristica,", childNodeBetaOne.heuristic);
+                console.log("nieto padre", betaOne.heuristic);
+                console.log("nieto abuelo",dummyNode.heuristic);
+                //poda
+                if (childNodeBetaOne.heuristic < betaOne.heuristic){
+                    betaOne.heuristic = childNodeBetaOne.heuristic;
+                }
+                if(childNodeBetaOne.heuristic < dummyNode.heuristic){/////////////////////////
+                    break;
+                }
+                /*else{
+                    queueMinimax.push(childNodeBetaOne);
+                }*/
+                ////
+                //while nietos nunca actualizan al abuelo
+            }
+            ///
+            console.log("reemplazo el valor del padre?",betaOne.heuristic > dummyNode.heuristic)
+            console.log(dummyNode.heuristic)
+            console.log(betaOne.heuristic)  
+            if(betaOne.heuristic > dummyNode.heuristic){
+                dummyNode.heuristic = betaOne.heuristic;
+                choice = betaOne.board;
+                console.log("choice",choice);
+            }
+            ///
 
+        }
         
         /*if(depth == 0 || !("children" in queue)){
             return node.weight;

@@ -22,7 +22,7 @@ const App = observer(class App extends Component {
         super(props);
         let gridSize = props.gridSize;
         let viewport = props.viewport;
-        let map = [[0,"2",0,"1"],[0,"2","1", 0],[0,0,0, 0],[0,0,0,0]];
+        let map = [[0,"2",0,"1"],[0,"2","1", 0],[0,"1",0, 0],[0,0,0,0]];
         this.state = { board: new Board({ board: map }), status: "New game" };
         let that = this;
 
