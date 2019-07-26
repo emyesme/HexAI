@@ -44,12 +44,12 @@ class HexAgent extends Agent {
 
     minimax(board,depth, max_player){
         //dummy node
-        let dummyNode = new Node(new State(board,this.id), undefined);
+        let dummyNode = new Node(board,this.id, undefined, -Infinity);
         //If the depth reach its limit or the node doesn't have any children return the node weight
         //calculando los hijos del padre
         /*console.log(board)
         console.log("dummyNode")*/
-        var dummyBoard =  dummyNode.state.board.map(function(arr){ return arr.slice();})
+        var dummyBoard =  dummyNode.board.map(function(arr){ return arr.slice();})
         //console.log(dummyBoard)
         var moves = getEmptyHex(dummyBoard);
         var childs = [];
@@ -58,26 +58,26 @@ class HexAgent extends Agent {
         for (let move of moves){
             //if(stop < 2){
             stop = stop + 1;
-            var childboard = dummyBoard.map(function(arr){ return arr.slice();})
+            var childboard = dummyBoard.map(function(arr){ return arr.slice();});
             //console.log(childboard);
-            childboard[Math.floor(move / dummyBoard.length)][move % dummyBoard.length] = dummyNode.state.idAgent;
+            childboard[Math.floor(move / dummyBoard.length)][move % dummyBoard.length] = dummyNode.idAgent;
             /*console.log("marco",dummyNode.state.idAgent)
             console.log(childboard[Math.floor(move / dummyBoard.length)][move % dummyBoard.length])
             console.log("chilboard cost..");
             console.log(childboard);*/
-            var child = new Node(new State(childboard,dummyNode.state.idAgent),dummyNode)
+            var child = new Node(childboard,dummyNode.idAgent,dummyNode,Infinity);
+            child.dijkstra();
+
             childs.push(child);
-            //console.log(child)
+            console.log(childs)
             //}
         }
-
-        /*console.log("hijos...");
-        console.log(childs);*/
+        //this.minimax()
 
         
-        if(depth == 0 || !("children" in queue)){
+        /*if(depth == 0 || !("children" in queue)){
             return node.weight;
-        }
+        }   
         
         var bestValue, v;
     
@@ -97,13 +97,11 @@ class HexAgent extends Agent {
             }
     
             return bestValue;
-        }
+        }*/
         return 0;
     }
 
 }
-
-
 
 
 module.exports = {
@@ -132,9 +130,20 @@ function getEmptyHex(board) {
 
 
 class Node {
-    constructor(state, parent) {
-        this.state = state;
+    constructor(board,idAgent, parent,heuristic) {
+        this.board = board;
+        this.idAgent = idAgent;
         this.parent = parent;
+        this.heuristic = heuristic;
+
+        this.dijkstra = this.dijkstra.bind(this)
+        this.treeDijkstra = this.treeDijkstra.bind(this)
+        this.cost = this.cost.bind(this)
+        this.insertSort = this.insertSort.bind(this)
+        this.getNeighborhood = this.getNeighborhood.bind(this)
+
+    }
+    dijkstra(){
         console.log("treeDijkstra");
         if (this.parent === undefined){
             this.heuristic = 0;
@@ -142,17 +151,17 @@ class Node {
         else{
             //contrincante id
             var idOponent = "2";
-            if (this.state.idAgent !== "1"){
+            if (this.idAgent !== "1"){
                 idOponent = "1";
             }
             console.log("DIJKSTRA calcula...")
             /*console.log(this.parent)*/
-            let oponentCost = this.state.treeDijkstra(idOponent);/////////////////
-            let myCost = this.state.treeDijkstra(this.state.idAgent);/////////////////
+            let oponentCost = this.treeDijkstra(idOponent);/////////////////
+            let myCost = this.treeDijkstra(this.idAgent);/////////////////
             console.log("sobrevivio")
             console.log("id",idOponent);
             console.log(oponentCost);
-            console.log("id",this.state.idAgent)
+            console.log("id",this.idAgent)
             console.log(myCost);
             console.log("estado ganador", oponentCost)
             console.log("estado ganador", myCost)
@@ -171,21 +180,7 @@ class Node {
         }
         console.log("TERMINA")
     }
-}
-
-class nodeDijkstra {
-    constructor(coordinate, weigth, goal) {
-        this.coordinate = coordinate;
-        this.weigth = weigth;
-        this.goal = goal;
-    }
-}
-
-class State {
-    constructor(board, idAgent) {
-        this.board = board;
-        this.idAgent = idAgent;
-    };
+    //
     treeDijkstra(id) {
         console.log("empieza dijkstra", id==="1")
         //dummy node
@@ -433,5 +428,15 @@ class State {
         return result;
     }
     ////
+
 }
+
+class nodeDijkstra {
+    constructor(coordinate, weigth, goal) {
+        this.coordinate = coordinate;
+        this.weigth = weigth;
+        this.goal = goal;
+    }
+}
+
 
