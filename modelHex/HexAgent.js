@@ -71,11 +71,13 @@ class HexAgent extends Agent {
             //}
         }
 
+        console.log("childs:", childs);
+
         /*console.log("hijos...");
         console.log(childs);*/
 
         
-        if(depth == 0 || !("children" in queue)){
+        if(depth == 0){
             return node.weight;
         }
         
@@ -88,12 +90,16 @@ class HexAgent extends Agent {
             for(let child of parent_node){
                 v = minimax(parent_node.children[child], depth-1, false);
                 bestValue = Math.max(v, bestValue);
+                alpha = Math.max(alpha, bestValue);
+                if(beta <= alpha) break;
             }
         }else{
             bestValue = Infinity;
             for(let child of parent_node){
                 v = minimax(parent_node.children[child], depth-1, true);
                 bestValue = Math.min(v, bestValue);
+                beta = Math.min(beta, bestValue);
+                if(beta <= alpha) break; 
             }
     
             return bestValue;
