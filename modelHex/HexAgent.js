@@ -34,6 +34,7 @@ class HexAgent extends Agent {
         //error raro 
         var t0 = performance.now();
         var board = this.perception.map(function (arr) { return arr.slice(); })
+        console.log(board)
         //const board = this.perception;
         //console.log(this.perception)
         //console.log("costo del padre")
@@ -58,40 +59,35 @@ class HexAgent extends Agent {
         //nivel 1        
         var moves = getEmptyHex(dummyBoard);
         let primerNivel = 1;
-        let segundoNivel = 1;
-        let tercerNivel = 1;
         for (let move of moves) {
-            var childboard = dummyBoard.map(function (arr) { return arr.slice(); });
+            let childboard = dummyBoard.map(function (arr) { return arr.slice(); });
             childboard[Math.floor(move / dummyBoard.length)][move % dummyBoard.length] = dummyNode.idAgent;//yo id
             //console.log("id nivel 1 ", dummyNode.idAgent)
-            var betaOne = new Node(childboard, dummyNode.idAgent, dummyNode, 99);//yo id
-            if (primerNivel === 1) {
-                console.log("primer nivel, hijo: ", move, "h: ", betaOne.heuristic);
-            }
-            primerNivel = primerNivel + 1;
-            //betaOne.dijkstra()
+            let betaOne = new Node(childboard, dummyNode.idAgent, dummyNode, 99);//yo id
+            //if (primerNivel === 1) {
+                //console.log("primer nivel, hijo: ", move, "h: ", betaOne.heuristic);
+            //}
+            //betaOne.dijkstra()    
             //console.log(betaOne);
-            if (betaOne.dijkstra(dummyNode.idAgent, board) === 0) {
+            if (betaOne.dijkstra(dummyNode.idAgent, childboard) === 0) {
                 return move
             }
-            console.log("betaOne", betaOne.heuristic)
+            //console.log("betaOne", betaOne.heuristic)
             //nivel 2
             let idOponent = "2";
             if (betaOne.idAgent !== "1") {
                 idOponent = "1";
             }
-            let betaOneBoard = betaOne.board.map(function (arr) { return arr.slice(); })
-            let movesBeta = getEmptyHex(betaOneBoard);
+            let movesBeta = getEmptyHex(childboard);
             for (let moveBeta of movesBeta) {
-                let childboardBetaOne = betaOneBoard.map(function (arr) { return arr.slice(); });
+                let childboardBetaOne = betaOne.board.map(function (arr) { return arr.slice(); }); 
                 //while nietos nunca actualizan al abuelo
                 //console.log("id nivel 2 ", idOponent)
-                childboardBetaOne[Math.floor(moveBeta / betaOneBoard.length)][moveBeta % betaOneBoard.length] = idOponent;
+                childboardBetaOne[Math.floor(moveBeta / childboard.length)][moveBeta % childboard.length] = idOponent;
                 let childNodeBetaOne = new Node(childboardBetaOne, idOponent, betaOne, -99);//oponente
-                if (segundoNivel === 1){
-                    console.log("segundo nivel, hijo: ", moveBeta, "h: ", childNodeBetaOne.heuristic);
-                }
-                segundoNivel = segundoNivel + 1;
+                //if (primerNivel === 1){
+                    //console.log("segundo nivel, hijo: child", move, "h: ", childNodeBetaOne.heuristic);
+                //}
                 //nivel 3
                 let movesChild = getEmptyHex(childboardBetaOne);
                 for (let moveChild of movesChild) {
@@ -100,11 +96,10 @@ class HexAgent extends Agent {
                     babyboardAlphaOne[Math.floor(moveChild / childboardBetaOne.length)][moveChild % childboardBetaOne.length] = dummyNode.idAgent;
                     var babyNodeAlphaOne = new Node(babyboardAlphaOne, dummyNode.idAgent, childNodeBetaOne, 99);//yo
                     //console.log("dijkstra babynodealphaone")
-                    babyNodeAlphaOne.calculateHeuristic(childNodeBetaOne.idAgent,babyNodeAlphaOne.board);
-                    //if (tercerNivel === 2){
-                        console.log("tercer nivel, hijos: ", moveChild, "h: ", babyNodeAlphaOne.heuristic)
+                    babyNodeAlphaOne.calculateHeuristic(babyNodeAlphaOne.idAgent,babyNodeAlphaOne.board);
+                    //if (primerNivel === 1){
+                        //console.log("tercer nivel, hijos: ", moveChild, "h: ", babyNodeAlphaOne.heuristic)
                     //}
-                    tercerNivel = tercerNivel + 1;
                     //movimiento propio no cambio heuristica
                     if (babyNodeAlphaOne.heuristic > childNodeBetaOne.heuristic) {
                         childNodeBetaOne.heuristic = babyNodeAlphaOne.heuristic;
@@ -113,18 +108,22 @@ class HexAgent extends Agent {
                         //poda
                         break;
                     }
+                    
                 }
+                primerNivel = primerNivel + 1;
                 if (childNodeBetaOne.heuristic < betaOne.heuristic) {
+                    //console.log("aqui?",primerNivel,"...",childNodeBetaOne.heuristic, "<", betaOne.heuristic)
                     betaOne.heuristic = childNodeBetaOne.heuristic;//////#############
-
+                    //console.log("beta one nuevo", betaOne.heuristic)
                     //console.log("choice 3", choice, "heuristica, ", childNodeBetaOne.heuristic);
                 }
                 if (childNodeBetaOne.heuristic <= dummyNode.heuristic) {/////////////////////////
                     break;
                 }
             }
+            console.log("beta one move:",move, "heu", betaOne.heuristic)
             if (betaOne.heuristic > dummyNode.heuristic) {
-                console.log("dummy antes", dummyNode.heuristic)
+                //console.log("dummy antes", dummyNode.heuristic)
                 dummyNode.heuristic = betaOne.heuristic;
                 choice = move;
                 console.log("choice", choice, ":", dummyNode.heuristic)
