@@ -15,7 +15,7 @@ import problemContainer from './modelHex/problemContainer';
 import {HexAgent, HexAgentRandom} from './modelHex/HexAgent';
 
 problemContainer.addAgent("1", HexAgent, { play: true });
-problemContainer.addAgent("2", HexAgentRandom, { play: false });
+problemContainer.addAgent("2", HexAgent, { play: false });
 
 const App = observer(class App extends Component {
     constructor(props) {

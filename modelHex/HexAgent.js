@@ -32,20 +32,28 @@ class HexAgent extends Agent {
     };
     send() {
         //error raro 
-        var t0 = performance.now();
+        //var t0 = performance.now();
         var board = this.perception.map(function (arr) { return arr.slice(); })
-        console.log(board)
+        let size = board.length;
+        let available = getEmptyHex(board);
+        let nTurn = size * size - available.length;
+        if (nTurn == 0) { // First move
+            return [Math.floor(size / 2) - 1, Math.floor(size / 2) + 1 ];
+        }
+        if(nTurn == 1){
+            return [Math.floor(size / 2) + 1, Math.floor(size / 2) - 1 ];
+        }
         //const board = this.perception;
         //console.log(this.perception)
         //console.log("costo del padre")
         //console.log(dummyNode)
         let depth = 3;
         let max_player = true;
-        console.log("entra a minimax")
+        //console.log("entra a minimax")
         let bestValue = this.minimax(board, depth, max_player);
-        var t1 = performance.now();
-        console.log("BESTVALUE", bestValue);
-        console.log("tiempo ms", t1 - t0);
+        //var t1 = performance.now();
+        //console.log("BESTVALUE", bestValue);
+        //console.log("tiempo ms", t1 - t0);
         return [Math.floor(bestValue / board.length), bestValue % board.length];
     }
     /**minimax */
@@ -97,6 +105,7 @@ class HexAgent extends Agent {
                     var babyNodeAlphaOne = new Node(babyboardAlphaOne, dummyNode.idAgent, childNodeBetaOne, 99);//yo
                     //console.log("dijkstra babynodealphaone")
                     babyNodeAlphaOne.calculateHeuristic(babyNodeAlphaOne.idAgent,babyNodeAlphaOne.board);
+                    //console.log("nivel 3")
                     //if (primerNivel === 1){
                         //console.log("tercer nivel, hijos: ", moveChild, "h: ", babyNodeAlphaOne.heuristic)
                     //}
@@ -121,12 +130,12 @@ class HexAgent extends Agent {
                     break;
                 }
             }
-            console.log("beta one move:",move, "heu", betaOne.heuristic)
+            //console.log("beta one move:",move, "heu", betaOne.heuristic)
             if (betaOne.heuristic > dummyNode.heuristic) {
                 //console.log("dummy antes", dummyNode.heuristic)
                 dummyNode.heuristic = betaOne.heuristic;
                 choice = move;
-                console.log("choice", choice, ":", dummyNode.heuristic)
+                //console.log("choice", choice, ":", dummyNode.heuristic)
                 //console.log("choice", choice, "heuristica ,", betaOne.heuristic);
             }
         }
