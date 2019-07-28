@@ -32,9 +32,18 @@ class HexAgent extends Agent {
     };
     send() {
         //error raro 
-        //var t0 = performance.now();
+        var t0 = performance.now();
         var board = this.perception.map(function (arr) { return arr.slice(); })
-        
+        let size = board.length;
+        let available = getEmptyHex(board);
+        let nTurn = size * size - available.length;
+
+        if (nTurn == 0) { // First move
+            return [Math.floor(size / 2) - 1, Math.floor(size / 2) + 1 ];
+        }
+        if(nTurn == 1){
+            return [Math.floor(size / 2) + 1, Math.floor(size / 2) - 1 ];
+        }
         //const board = this.perception;
         //console.log(this.perception)
         //console.log("costo del padre")
@@ -43,9 +52,9 @@ class HexAgent extends Agent {
         let max_player = true;
         //console.log("entra a minimax")
         let bestValue = this.minimax(board, depth, max_player);
-        //var t1 = performance.now();
+        var t1 = performance.now();
         //console.log("BESTVALUE", bestValue);
-        //console.log("tiempo ms", t1 - t0);
+        console.log("tiempo ms", t1 - t0);
         return [Math.floor(bestValue / board.length), bestValue % board.length];
     }
     /**minimax */
@@ -110,6 +119,7 @@ class HexAgent extends Agent {
                             thingBoardAlphaOne[Math.floor(moveThing / smallBabyBoardBetaOne.length)][moveThing % smallBabyBoardBetaOne.length] =dummyNode.idAgent;
                             let thingAlphaOne = new Node(thingBoardAlphaOne, dummyNode.idAgent, smallBabyBetaOne, 99);//yo
                             //heuristica de las hojas
+                            console.log("nivel 5")
                             thingAlphaOne.calculateHeuristic(thingAlphaOne.idAgent, thingAlphaOne.board);
                             //movimiento propio no cambio heuristica
                             if (thingAlphaOne.heuristic > smallBabyBetaOne.heuristic){
@@ -123,7 +133,7 @@ class HexAgent extends Agent {
                         if (smallBabyBetaOne.heuristic < babyNodeAlphaOne.heuristic) {
                             babyNodeAlphaOne.heuristic = smallBabyBetaOne.heuristic;//////#############
                         }
-                        if (smallBabyBetaOne.heuristic <= babyNodeAlphaOne.heuristic) {/////////////////////////
+                        if (smallBabyBetaOne.heuristic <= childNodeBetaOne.heuristic) {/////////////////////////
                             break;
                         }
 
